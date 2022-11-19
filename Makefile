@@ -1,45 +1,48 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    Makefile                                           :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: aeloyan <marvin@42.fr>                     +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2022/07/01 18:38:37 by aeloyan           #+#    #+#              #
-#    Updated: 2022/08/19 18:07:55 by aeloyan          ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
+NAME = so_long
 
-SRCS = $(wildcard *.c)
-	  
-OBJS = $(SRCS:.c=.o)
+NAME_B = so_long_bonus
 
-NAME = libftprintf.a 
+OBJ_M = main_mondat.o
 
-FLAGS = -Wall -Wextra -Werror
+OBJ_B = main_bonus.o
 
-RM = rm -f
+SRC = $(wildcard *.c)
+
+OBJ = $(filter-out $(OBJ_B) $(OBJ_M),$(SRC:.c=.o))
 
 CC = cc
 
+FLAGS = -Wall -Wextra -Werror -g -fsanitize=address
+
+RM = rm -rf
+
 .c.o:
-	$(CC) $(FLAGS) -c $< -o $(<:.c=.o)
+	@$(CC) $(FLAGS) -Imlx -c $< -o $(<:.c=.o)
 
-$(NAME):	$(OBJS)
-	$(MAKE) bonus -C ./libft
-	cp ./libft/libft.a .
-	$(MAKE) -C ./libft fclean
-	ar rcs libft.a $(OBJS)
-	mv libft.a $(NAME)
+$(NAME): $(OBJ) $(OBJ_M)
+	@$(MAKE) -C ./ft_printf
+	@cp ./ft_printf/libftprintf.a .
+	@$(MAKE) -C ./ft_printf fclean
+	@$(CC) $(FLAGS) $(OBJ) $(OBJ_M) -lftprintf -L. -lmlx -framework OpenGL -framework AppKit -o $(NAME)
+	@echo DONE!
 
-all:	$(NAME)
+$(NAME_B): $(OBJ) $(OBJ_B)
+	@$(MAKE) -C ./ft_printf
+	@cp ./ft_printf/libftprintf.a .
+	@$(MAKE) -C ./ft_printf fclean
+	@$(CC)  $(FLAGS) $(OBJ) $(OBJ_B) -lftprintf -L. -lmlx -framework OpenGL -framework AppKit -o $(NAME_B)
+	@echo DONE!
+
+bonus: $(NAME_B)
+
+all: $(NAME)
 
 clean:
-	$(RM) $(OBJS) 
-	
+	@$(RM) $(OBJ) $(OBJ_B) $(OBJ_M)
+
 fclean: clean
-	$(RM) $(NAME)
+	@$(RM) $(NAME) $(NAME_B) libftprintf.a
 
 re:	fclean all
 
-.PHONY: clean fclean re all
+.PHONY: NAME all clean fclean re
